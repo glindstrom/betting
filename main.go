@@ -90,6 +90,7 @@ func main() {
 
 	mMatch = make(map [int]match)
 	addMatchesToMap(w.Matches)
+	addMatchesToMap(w.Matches2)
 
 	v := make([]match, 0, len(mMatch))
 	for _, value := range mMatch {
