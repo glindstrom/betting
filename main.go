@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"net/http"
 	"sort"
-	"time"
-	"math/big"
-	"strings"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type wrapper struct {
-	Leagues []league `json:"leagues"`
-	Matches []match `json:"matches"`
-	Matches2 []match `json:"matches2"`
+	Leagues  []league `json:"leagues"`
+	Matches  []match  `json:"matches"`
+	Matches2 []match  `json:"matches2"`
 }
 
 type league struct {
@@ -26,7 +26,7 @@ type league struct {
 }
 
 type match struct {
-	ID	int `json: "id"`
+	ID       int `json: "id"`
 	LeagueID int `json:"league_id"`
 	Team1    string
 	Team2    string
@@ -36,19 +36,19 @@ type match struct {
 	DateTime time.Time
 }
 
-func(m match) odds1() string {
+func (m match) odds1() string {
 	return odds(m.Prob1)
 }
 
-func(m match) odds2() string {
+func (m match) odds2() string {
 	return odds(m.Prob2)
 }
 
-func(m match) oddsTie() string {
+func (m match) oddsTie() string {
 	return odds(m.Probtie)
 }
 
-func(m match) time() time.Time {
+func (m match) time() time.Time {
 	return m.DateTime.Local()
 }
 
@@ -70,7 +70,12 @@ func (s matchesSort) Len() int {
 
 func (s matchesSort) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-func (s matchesSort) Less(i, j int) bool { return s[i].time().Before(s[j].time()) }
+func (s matchesSort) Less(i, j int) bool {
+	if s[i].time().Before(s[j].time()) {
+		return true
+	}
+	return mLeague[s[i].LeagueID].Country == mLeague[s[j].LeagueID].Country
+}
 
 func main() {
 	resp, err := http.Get("https://projects.fivethirtyeight.com/soccer-predictions/data.json")
@@ -88,7 +93,7 @@ func main() {
 	mLeague = make(map[int]league)
 	addToLeagueMap(w.Leagues)
 
-	mMatch = make(map [int]match)
+	mMatch = make(map[int]match)
 	addMatchesToMap(w.Matches)
 	addMatchesToMap(w.Matches2)
 
@@ -100,7 +105,7 @@ func main() {
 	printTodaysMatches(v)
 }
 func addMatchesToMap(matches []match) {
-	for _,m := range matches {
+	for _, m := range matches {
 		mMatch[m.ID] = m
 	}
 }
@@ -136,8 +141,8 @@ func floatToString(f float64) string {
 	return strings.Replace(strconv.FormatFloat(f, 'f', -1, 64), ".", ",", 1)
 }
 
-func addToLeagueMap(ls[]league) {
-	for _,l := range ls {
+func addToLeagueMap(ls []league) {
+	for _, l := range ls {
 		mLeague[l.ID] = l
 	}
 }
