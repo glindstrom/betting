@@ -108,8 +108,9 @@ func main() {
 		v = append(v, value)
 	}
 
-	//printTodaysMatches(v)
-	printTomorrowsMatches(v)
+	// printMatches(v, isTomorrow)
+	printMatches(v, isToday)
+
 }
 func addMatchesToMap(matches []match) {
 	for _, m := range matches {
@@ -123,23 +124,16 @@ func checkErr(err error) {
 	}
 }
 
-func printTodaysMatches(matches []match) {
+func printMatches(matches []match, fn shouldPrint) {
 	sort.Sort(matchesSort(matches))
 	for _, m := range matches {
-		if isToday(m) {
+		if fn(m) {
 			printMatch(m)
 		}
 	}
 }
 
-func printTomorrowsMatches(matches []match) {
-	sort.Sort(matchesSort(matches))
-	for _, m := range matches {
-		if isTomorrow(m) {
-			printMatch(m)
-		}
-	}
-}
+type shouldPrint func(m match) bool
 
 func isToday(m match) bool {
 	t1 := truncateDate(time.Now())
@@ -148,7 +142,7 @@ func isToday(m match) bool {
 }
 
 func isTomorrow(m match) bool {
-	tomorrow := time.Now().Add(24*time.Hour)
+	tomorrow := time.Now().Add(24 * time.Hour)
 	return truncateDate(tomorrow).Equal(truncateDate(m.time()))
 }
 
