@@ -108,7 +108,8 @@ func main() {
 		v = append(v, value)
 	}
 
-	printTodaysMatches(v)
+	//printTodaysMatches(v)
+	printTomorrowsMatches(v)
 }
 func addMatchesToMap(matches []match) {
 	for _, m := range matches {
@@ -131,10 +132,24 @@ func printTodaysMatches(matches []match) {
 	}
 }
 
+func printTomorrowsMatches(matches []match) {
+	sort.Sort(matchesSort(matches))
+	for _, m := range matches {
+		if isTomorrow(m) {
+			printMatch(m)
+		}
+	}
+}
+
 func isToday(m match) bool {
-	t1 := time.Now().Truncate(24 * time.Hour)
-	t2 := m.time().Truncate(24 * time.Hour)
+	t1 := truncateDate(time.Now())
+	t2 := truncateDate(m.time())
 	return t1.Equal(t2) && m.time().After(time.Now())
+}
+
+func isTomorrow(m match) bool {
+	tomorrow := time.Now().Add(24*time.Hour)
+	return truncateDate(tomorrow).Equal(truncateDate(m.time()))
 }
 
 func printMatch(m match) {
@@ -151,4 +166,8 @@ func addToLeagueMap(ls []league) {
 	for _, l := range ls {
 		mLeague[l.ID] = l
 	}
+}
+
+func truncateDate(d time.Time) time.Time {
+	return time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
 }
