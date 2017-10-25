@@ -77,8 +77,10 @@ func (s matchesSort) Less(i, j int) bool {
 	if s[i].time().After(s[j].time()) {
 		return false
 	}
-	if mLeague[s[i].LeagueID].Country != mLeague[s[j].LeagueID].Country {
-		return false
+	c1 := mLeague[s[i].LeagueID].Country
+	c2 := mLeague[s[j].LeagueID].Country
+	if c1 != c2 {
+		return strings.Compare(c1, c2) == -1
 	}
 	return strings.Compare(s[i].Team1, s[j].Team1) == -1
 }
