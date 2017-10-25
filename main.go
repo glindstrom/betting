@@ -34,6 +34,8 @@ type match struct {
 	Prob2    float64
 	Probtie  float64
 	DateTime time.Time
+	Score1   int `json: ",omitempty"`
+	Score2   int `json: ",omitempty"`
 }
 
 func (m match) odds1() string {
@@ -110,8 +112,8 @@ func main() {
 		v = append(v, value)
 	}
 
-	// printMatches(v, isTomorrow)
-	printMatches(v, isToday)
+	printMatches(v, isTomorrow)
+	//printMatches(v, isToday)
 
 }
 func addMatchesToMap(matches []match) {
