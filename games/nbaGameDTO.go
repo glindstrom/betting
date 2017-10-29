@@ -22,7 +22,6 @@ func (g NBAGameDTO) ToGame() Game {
 	loc, _ := time.LoadLocation("America/New_York")
 	layout := "2006-01-02 15:04"
 	date, _ := time.ParseInLocation(layout, dt, loc)
-
 	return Game{
 		ID:       g.ID,
 		DateTime: date.UTC(),

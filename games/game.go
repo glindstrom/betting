@@ -39,9 +39,9 @@ func odds(p float64) string {
 	return strings.Replace(fmt.Sprintf("%.2f", res), ".", ",", 1)
 }
 
-func (g Game) PrintCSV() {
-	t := g.Time().Format("02.01 15:04")
-	fmt.Println(t+";", g.League+";", g.Team1+";", g.Team2+";", g.Odds1()+";", g.Odds2()+";", floatToString(g.Prob1)+";", floatToString(g.Prob2))
+func (m Game) PrintCSV() {
+	t := m.Time().Format("02.01 15:04")
+	fmt.Println(t+";", m.League+";", m.Team2+";", m.Team1+";", m.Odds2()+";", m.Odds1()+";", floatToString(m.Prob2)+";", floatToString(m.Prob1))
 }
 
 func floatToString(f float64) string {
