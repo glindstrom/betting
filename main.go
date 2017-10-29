@@ -2,25 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/glindstrom/betting/leagues"
-	"github.com/glindstrom/betting/matches"
+	"github.com/glindstrom/betting/games"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
 
 type wrapper struct {
-	Leagues  []leagues.League `json:"leagues"`
-	Matches  []matches.Match  `json:"matches"`
-	Matches2 []matches.Match  `json:"matches2"`
+	Games []games.GameDTO `json:"games"`
 }
 
-var mLeague map[int]leagues.League
-
-var mMatch map[int]matches.Match
-
 func main() {
-	resp, err := http.Get("https://projects.fivethirtyeight.com/soccer-predictions/data.json")
+	resp, err := http.Get("https://projects.fivethirtyeight.com/2018-nba-predictions/data.json")
 	if err != nil {
 		log.Fatalln("http get error:", err)
 	}
@@ -32,34 +25,13 @@ func main() {
 	err = json.Unmarshal(buf, &w)
 	checkErr(err)
 
-	mLeague = make(map[int]leagues.League)
-	addToLeagueMap(w.Leagues)
-
-	mMatch = make(map[int]matches.Match)
-	addMatchesToMap(w.Matches)
-	addMatchesToMap(w.Matches2)
-
-	v := make([]matches.Match, 0, len(mMatch))
-	for _, value := range mMatch {
-		value.LeagueName = mLeague[value.LeagueID].LongName
-		value.Country = mLeague[value.LeagueID].Country
-		v = append(v, value)
+	v := make([]games.Game, 0, len(w.Games))
+	for _, value := range w.Games {
+		v = append(v, value.ToGame("NBA"))
 	}
 
-	matches.PrintMatches(v, matches.IsTomorrow)
-	//printMatches(v, matches.IsToday)
+	games.PrintGames(v, games.IsToday)
 
-}
-func addMatchesToMap(matches []matches.Match) {
-	for _, m := range matches {
-		mMatch[m.ID] = m
-	}
-}
-
-func addToLeagueMap(ls []leagues.League) {
-	for _, l := range ls {
-		mLeague[l.ID] = l
-	}
 }
 
 func checkErr(err error) {
