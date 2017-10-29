@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type GameDTO struct {
+type NBAGameDTO struct {
 	ID     int     `json:"id"`
 	Date   string  `json:"date"`
 	TimeEt string  `json:"time_et"`
@@ -17,7 +17,7 @@ type GameDTO struct {
 	Prob2  float64 `json:"carmelo_prob2"`
 }
 
-func (g GameDTO) ToGame(league string) Game {
+func (g NBAGameDTO) ToGame() Game {
 	dt := g.Date + " " + g.TimeEt
 	loc, _ := time.LoadLocation("America/New_York")
 	layout := "2006-01-02 15:04"
@@ -25,7 +25,7 @@ func (g GameDTO) ToGame(league string) Game {
 
 	return Game{
 		ID:       g.ID,
-		DateTime: date.Local(),
+		DateTime: date.UTC(),
 		Status:   g.Status,
 		Team1:    g.Team1,
 		Team2:    g.Team2,
@@ -33,6 +33,6 @@ func (g GameDTO) ToGame(league string) Game {
 		Prob2:    g.Prob2,
 		Score1:   g.Score1,
 		Score2:   g.Score2,
-		League:   league,
+		League:   "NBA",
 	}
 }

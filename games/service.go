@@ -17,13 +17,13 @@ type filter func(g Game) bool
 
 func IsToday(g Game) bool {
 	t1 := truncateDate(time.Now())
-	t2 := truncateDate(g.DateTime)
-	return t1.Equal(t2) && g.DateTime.After(time.Now())
+	t2 := truncateDate(g.Time())
+	return t1.Equal(t2) && g.Time().After(time.Now())
 }
 
 func IsTomorrow(g Game) bool {
 	tomorrow := time.Now().Add(24 * time.Hour)
-	return truncateDate(tomorrow).Equal(truncateDate(g.DateTime))
+	return truncateDate(tomorrow).Equal(truncateDate(g.Time()))
 }
 
 func truncateDate(d time.Time) time.Time {

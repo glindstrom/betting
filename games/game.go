@@ -21,6 +21,10 @@ type Game struct {
 	League   string
 }
 
+func (g Game) Time() time.Time {
+	return g.DateTime.Local()
+}
+
 func (g Game) Odds1() string {
 	return odds(g.Prob1)
 }
@@ -35,9 +39,9 @@ func odds(p float64) string {
 	return strings.Replace(fmt.Sprintf("%.2f", res), ".", ",", 1)
 }
 
-func (m Game) PrintCSV() {
-	t := m.DateTime.Format("02.01 15:04")
-	fmt.Println(t+";", m.Team1+";", m.Team2+";", m.Odds1()+";", m.Odds2()+";", floatToString(m.Prob1)+";", floatToString(m.Prob2))
+func (g Game) PrintCSV() {
+	t := g.Time().Format("02.01 15:04")
+	fmt.Println(t+";", g.League+";", g.Team1+";", g.Team2+";", g.Odds1()+";", g.Odds2()+";", floatToString(g.Prob1)+";", floatToString(g.Prob2))
 }
 
 func floatToString(f float64) string {
