@@ -6,7 +6,6 @@ import (
 	"github.com/glindstrom/betting/db"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"log"
 	"net/http"
 )
@@ -14,20 +13,16 @@ import (
 type GameController struct{}
 
 func (gc GameController) GetGames(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	session := db.Session.Copy()
-	defer session.Close()
-	c := session.DB(db.DataBase).C(GamesCollection)
-	saveAllGames(c)
+	saveAllGames(db.Games)
 
-	var games []Game
-	err := c.Find(bson.M{}).All(&games)
+	gms, err := AllGames()
 	if err != nil {
 		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
 		log.Println("Failed get all games: ", err)
 		return
 	}
 
-	respBody, err := json.Marshal(games)
+	respBody, err := json.Marshal(gms)
 	if err != nil {
 		log.Fatal(err)
 	}

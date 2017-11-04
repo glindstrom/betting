@@ -2,6 +2,7 @@ package games
 
 import (
 	"fmt"
+	"github.com/glindstrom/betting/db"
 	"gopkg.in/mgo.v2/bson"
 	"math/big"
 	"strconv"
@@ -52,4 +53,13 @@ func (m Game) PrintCSV() {
 
 func floatToString(f float64) string {
 	return strings.Replace(strconv.FormatFloat(f, 'f', -1, 64), ".", ",", 1)
+}
+
+func AllGames() ([]Game, error) {
+	var gms []Game
+	err := db.Games.Find(bson.M{}).All(&gms)
+	if err != nil {
+		return nil, err
+	}
+	return gms, nil
 }
