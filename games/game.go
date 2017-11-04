@@ -2,23 +2,29 @@ package games
 
 import (
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 	"math/big"
 	"strconv"
 	"strings"
 	"time"
 )
 
+const (
+	GamesCollection = "games"
+)
+
 type Game struct {
-	ID       int `json:"id"`
-	DateTime time.Time
-	Status   string `json:"status"`
-	Team1    string `json:"team1"`
-	Team2    string `json:"team2"`
-	Score1   int    `json:"score1"`
-	Score2   int    `json:"score2"`
-	Prob1    float64
-	Prob2    float64
-	League   string
+	ID       bson.ObjectId `json:"id" bson:"_id"`
+	ID538    int           `json:"id538" bson:"id538"`
+	DateTime time.Time     `json:"dateTime" bson:"dateTime"`
+	Status   string        `json:"status" bson:"status"`
+	Team1    string        `json:"team1" bson:"team1"`
+	Team2    string        `json:"team2" bson:"team2"`
+	Score1   *int          `json:"score1" bson:"score1,omitempty"`
+	Score2   *int          `json:"score2" bson:"score2,omitempty"`
+	Prob1    float64       `json:"prob1" bson:"prob1"`
+	Prob2    float64       `json:"prob2" bson:"prob2"`
+	League   string        `json:"league" bson:"league"`
 }
 
 func (g Game) Time() time.Time {

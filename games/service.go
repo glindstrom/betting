@@ -2,6 +2,7 @@ package games
 
 import (
 	"encoding/json"
+	"gopkg.in/mgo.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -35,6 +36,17 @@ func PrintGames(games []Game, fn filter) {
 	}
 }
 
+func getSession() *mgo.Session {
+	// Connect to our local mongo
+	s, err := mgo.Dial("mongodb://localhost")
+
+	// Check if connection error, is mongo running?
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
 type filter func(g Game) bool
 
 func IsToday(g Game) bool {
@@ -53,15 +65,20 @@ func truncateDate(d time.Time) time.Time {
 }
 
 func PrintAllGames() {
+	PrintGames(fetchAllGames(), IsToday)
+}
+
+func fetchAllGames() []Game {
 	allGames := make([]GameDTO, 0)
 	allGames = append(allGames, importNBAGames()...)
 	allGames = append(allGames, importNFLGames()...)
 	allGames = append(allGames, importMLBGames()...)
 	v := make([]Game, 0, len(allGames))
 	for _, value := range allGames {
-		v = append(v, value.ToGame())
+		g := value.ToGame()
+		v = append(v, g)
 	}
-	PrintGames(v, IsToday)
+	return v
 }
 
 func importNBAGames() []GameDTO {
@@ -76,7 +93,7 @@ func importNBAGames() []GameDTO {
 	return gs
 }
 
-func importNFLGames()[]GameDTO {
+func importNFLGames() []GameDTO {
 	buf := fetchGames(nflDataURL)
 	var nfl nflGameWrapper
 	err := json.Unmarshal(buf, &nfl)
@@ -88,13 +105,14 @@ func importNFLGames()[]GameDTO {
 	return gs
 }
 
-func importMLBGames()[]GameDTO {
+func importMLBGames() []GameDTO {
 	buf := fetchGames(mlbDataURL)
 	var mlb mlbGameWrapper
 	err := json.Unmarshal(buf, &mlb)
 	checkErr(err)
 	gs := make([]GameDTO, 0, len(mlb.Games))
-	for _, value := range mlb.Games {gs = append(gs, value)
+	for _, value := range mlb.Games {
+		gs = append(gs, value)
 	}
 	return gs
 }

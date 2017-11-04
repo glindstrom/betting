@@ -19,8 +19,8 @@ type Match struct {
 	Prob2      float64
 	Probtie    float64
 	DateTime   time.Time
-	Score1     int `json: ",omitempty"`
-	Score2     int `json: ",omitempty"`
+	Score1     *int `json: ",omitempty"`
+	Score2     *int `json: ",omitempty"`
 }
 
 func (m Match) Odds1() string {

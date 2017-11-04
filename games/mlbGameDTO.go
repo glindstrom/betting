@@ -1,6 +1,9 @@
 package games
 
-import "time"
+import (
+	"gopkg.in/mgo.v2/bson"
+	"time"
+)
 
 type MLBGameDTO struct {
 	ID       int       `json:"id"`
@@ -8,15 +11,16 @@ type MLBGameDTO struct {
 	Status   string    `json:"status"`
 	Team1    string    `json:"team1"`
 	Team2    string    `json:"team2"`
-	Score1   int       `json:"score1"`
-	Score2   int       `json:"score2"`
+	Score1   *int      `json:"score1"`
+	Score2   *int      `json:"score2"`
 	Prob1    float64   `json:"prob1"`
 	Prob2    float64   `json:"prob2"`
 }
 
 func (g MLBGameDTO) ToGame() Game {
 	return Game{
-		ID:       g.ID,
+		ID:       bson.NewObjectId(),
+		ID538:    g.ID,
 		DateTime: g.DateTime,
 		Status:   g.Status,
 		Team1:    g.Team1,
