@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"math"
 )
 
 const (
@@ -32,23 +33,33 @@ func (g Game) Time() time.Time {
 	return g.DateTime.Local()
 }
 
-func (g Game) Odds1() string {
-	return odds(g.Prob1)
+func (g Game) Odds1() float64 {
+	return floatOrZero(odds(g.Prob1))
 }
 
-func (g Game) Odds2() string {
-	return odds(g.Prob2)
+func (g Game) Odds2() float64 {
+	return floatOrZero(odds(g.Prob2))
 }
 
-func odds(p float64) string {
+func (g Game) Odds1String() string {
+	return floatToString(odds(g.Prob1))
+}
+
+func (g Game) Odds2String() string {
+	return floatToString(odds(g.Prob2))
+}
+
+func odds(p float64) float64 {
 	x, y := big.NewFloat(1), big.NewFloat(p)
 	res, _ := new(big.Float).Quo(x, y).Float64()
-	return strings.Replace(fmt.Sprintf("%.2f", res), ".", ",", 1)
+	return res
+	//return strings.Replace(fmt.Sprintf("%.2f", res), ".", ",", 1)
 }
+
 
 func (m Game) PrintCSV() {
 	t := m.Time().Format("02.01 15:04")
-	fmt.Println(t+";", m.League+";", m.Team2+";", m.Team1+";", m.Odds2()+";", m.Odds1()+";", floatToString(m.Prob2)+";", floatToString(m.Prob1))
+	fmt.Println(t+";", m.League+";", m.Team2+";", m.Team1+";", m.Odds2String()+";", m.Odds1String()+";", floatToString(m.Prob2)+";", floatToString(m.Prob1))
 }
 
 func floatToString(f float64) string {
@@ -62,4 +73,11 @@ func AllGames() ([]Game, error) {
 		return nil, err
 	}
 	return gms, nil
+}
+
+func floatOrZero(f float64) float64 {
+	if math.IsNaN(f) || math.IsInf(f, 0) {
+		return 0
+	}
+	return f
 }

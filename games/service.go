@@ -60,6 +60,10 @@ func IsTomorrow(g Game) bool {
 	return truncateDate(tomorrow).Equal(truncateDate(g.Time()))
 }
 
+func IsTodayOrTomorrow(g Game) bool {
+	return IsToday(g) || IsTomorrow(g)
+}
+
 func truncateDate(d time.Time) time.Time {
 	return time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
 }
