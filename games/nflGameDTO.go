@@ -23,12 +23,12 @@ func (g NFLGameDTO) ToGame() Game {
 		ID538:    g.ID,
 		DateTime: g.DateTime,
 		Status:   g.Status,
-		Team1:    g.Team1,
-		Team2:    g.Team2,
-		Prob1:    g.Prob1,
-		Prob2:    g.Prob2,
-		Score1:   g.Score1,
-		Score2:   g.Score2,
+		Team1:    g.Team2,
+		Team2:    g.Team1,
+		Prob1:    g.Prob2,
+		Prob2:    g.Prob1,
+		Score1:   g.Score2,
+		Score2:   g.Score1,
 		League:   "NFL",
 	}
 }

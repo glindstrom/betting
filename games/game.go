@@ -11,10 +11,6 @@ import (
 	"math"
 )
 
-const (
-	GamesCollection = "games"
-)
-
 type Game struct {
 	ID       bson.ObjectId `json:"id" bson:"_id"`
 	ID538    int           `json:"id538" bson:"id538"`
@@ -27,6 +23,8 @@ type Game struct {
 	Prob1    float64       `json:"prob1" bson:"prob1"`
 	Prob2    float64       `json:"prob2" bson:"prob2"`
 	League   string        `json:"league" bson:"league"`
+	OfferedOdds1 float64    `json:"offeredOdds1" bson:"offeredOdds1,omitempty"`
+	OfferedOdds2 float64    `json:"offeredOdds2" bson:"offeredOdds2,omitempty"`
 }
 
 func (g Game) Time() time.Time {
@@ -73,6 +71,19 @@ func AllGames() ([]Game, error) {
 		return nil, err
 	}
 	return gms, nil
+}
+
+func OneGame(id bson.ObjectId ) (Game, error) {
+	var g Game
+	err := db.Games.Find(bson.M{"_id": id}).One(&g)
+	if err != nil {
+		return g, err
+	}
+	return g, nil
+}
+
+func UpdateGame(g Game) (error) {
+	return db.Games.Update(bson.M{"_id": g.ID}, &g)
 }
 
 func floatOrZero(f float64) float64 {
