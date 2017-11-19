@@ -2,7 +2,6 @@ package games
 
 import (
 	"encoding/json"
-	"gopkg.in/mgo.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -27,26 +26,6 @@ type mlbGameWrapper struct {
 	Games []MLBGameDTO `json:"games"`
 }
 
-func PrintGames(games []Game, fn filter) {
-	SortGames(games)
-	for _, g := range games {
-		if fn(g) {
-			g.PrintCSV()
-		}
-	}
-}
-
-func getSession() *mgo.Session {
-	// Connect to our local mongo
-	s, err := mgo.Dial("mongodb://localhost")
-
-	// Check if connection error, is mongo running?
-	if err != nil {
-		panic(err)
-	}
-	return s
-}
-
 type filter func(g Game) bool
 
 func IsToday(g Game) bool {
@@ -66,10 +45,6 @@ func IsTodayOrTomorrow(g Game) bool {
 
 func truncateDate(d time.Time) time.Time {
 	return time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
-}
-
-func PrintAllGames() {
-	PrintGames(fetchAllGames(), IsToday)
 }
 
 func fetchAllGames() []Game {

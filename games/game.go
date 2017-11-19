@@ -1,7 +1,6 @@
 package games
 
 import (
-	"fmt"
 	"github.com/glindstrom/betting/db"
 	"gopkg.in/mgo.v2/bson"
 	"math"
@@ -58,12 +57,6 @@ func odds(p float64) float64 {
 	x, y := big.NewFloat(1), big.NewFloat(p)
 	res, _ := new(big.Float).Quo(x, y).Float64()
 	return res
-	//return strings.Replace(fmt.Sprintf("%.2f", res), ".", ",", 1)
-}
-
-func (g Game) PrintCSV() {
-	t := g.Time().Format("02.01 15:04")
-	fmt.Println(t+";", g.League+";", g.Team2+";", g.Team1+";", g.Odds2String()+";", g.Odds1String()+";", floatToString(g.Prob2)+";", floatToString(g.Prob1))
 }
 
 func (g Game) OptimalBetSize() float64 {
@@ -125,7 +118,7 @@ func AllGames() ([]Game, error) {
 
 func UpcomingGames() ([]Game, error) {
 
-	tomorrow := time.Now().Add(24 * time.Hour).UTC().Truncate(24*time.Hour)
+	tomorrow := time.Now().Add(24 * time.Hour).UTC().Truncate(24 * time.Hour)
 	var gms []Game
 	err := db.Games.Find(bson.M{"status": "pre", "dateTime": bson.M{"$lte": tomorrow}}).All(&gms)
 	if err != nil {
