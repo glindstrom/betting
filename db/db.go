@@ -39,5 +39,38 @@ func init() {
 	DB = s.DB(DataBase)
 	Games = DB.C(GamesCollection)
 
+	index := mgo.Index{
+		Key:        []string{"status"},
+		Unique:     false,
+		Background: true,
+		Sparse:     true,
+	}
+	err = Games.EnsureIndex(index)
+	if err != nil {
+		panic(err)
+	}
+
+	index = mgo.Index{
+		Key:        []string{"-dateTime"},
+		Unique:     false,
+		Background: true,
+		Sparse:     true,
+	}
+	err = Games.EnsureIndex(index)
+	if err != nil {
+		panic(err)
+	}
+
+	index = mgo.Index{
+		Key:        []string{"id538"},
+		Unique:     true,
+		Background: true,
+		Sparse:     true,
+	}
+	err = Games.EnsureIndex(index)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("You connected to your mongo database.")
 }

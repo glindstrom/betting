@@ -4,27 +4,34 @@ import (
 	"fmt"
 	"github.com/glindstrom/betting/db"
 	"gopkg.in/mgo.v2/bson"
+	"math"
 	"math/big"
 	"strconv"
 	"strings"
 	"time"
-	"math"
+)
+
+const (
+	maxBetFraction = 0.05
+	kellyFraction  = 0.25
 )
 
 type Game struct {
-	ID       bson.ObjectId `json:"id" bson:"_id"`
-	ID538    int           `json:"id538" bson:"id538"`
-	DateTime time.Time     `json:"dateTime" bson:"dateTime"`
-	Status   string        `json:"status" bson:"status"`
-	Team1    string        `json:"team1" bson:"team1"`
-	Team2    string        `json:"team2" bson:"team2"`
-	Score1   *int          `json:"score1" bson:"score1,omitempty"`
-	Score2   *int          `json:"score2" bson:"score2,omitempty"`
-	Prob1    float64       `json:"prob1" bson:"prob1"`
-	Prob2    float64       `json:"prob2" bson:"prob2"`
-	League   string        `json:"league" bson:"league"`
-	OfferedOdds1 float64    `json:"offeredOdds1" bson:"offeredOdds1,omitempty"`
-	OfferedOdds2 float64    `json:"offeredOdds2" bson:"offeredOdds2,omitempty"`
+	ID              bson.ObjectId `json:"id" bson:"_id"`
+	ID538           int           `json:"id538" bson:"id538"`
+	DateTime        time.Time     `json:"dateTime" bson:"dateTime"`
+	Status          string        `json:"status" bson:"status"`
+	Team1           string        `json:"team1" bson:"team1"`
+	Team2           string        `json:"team2" bson:"team2"`
+	Score1          *int          `json:"score1" bson:"score1,omitempty"`
+	Score2          *int          `json:"score2" bson:"score2,omitempty"`
+	Prob1           float64       `json:"prob1" bson:"prob1"`
+	Prob2           float64       `json:"prob2" bson:"prob2"`
+	League          string        `json:"league" bson:"league"`
+	OfferedOdds1    float64       `json:"offeredOdds1" bson:"offeredOdds1,omitempty"`
+	OfferedOdds2    float64       `json:"offeredOdds2" bson:"offeredOdds2,omitempty"`
+	PredictedWinner string        `json:"predictedWinner" bson:"predictedWinner,omitempty"`
+	BetAmount       float64       `json:"betAmount" bson:"betAmount,omitempty"`
 }
 
 func (g Game) Time() time.Time {
@@ -54,10 +61,53 @@ func odds(p float64) float64 {
 	//return strings.Replace(fmt.Sprintf("%.2f", res), ".", ",", 1)
 }
 
+func (g Game) PrintCSV() {
+	t := g.Time().Format("02.01 15:04")
+	fmt.Println(t+";", g.League+";", g.Team2+";", g.Team1+";", g.Odds2String()+";", g.Odds1String()+";", floatToString(g.Prob2)+";", floatToString(g.Prob1))
+}
 
-func (m Game) PrintCSV() {
-	t := m.Time().Format("02.01 15:04")
-	fmt.Println(t+";", m.League+";", m.Team2+";", m.Team1+";", m.Odds2String()+";", m.Odds1String()+";", floatToString(m.Prob2)+";", floatToString(m.Prob1))
+func (g Game) OptimalBetSize() float64 {
+	if !shouldBetOnGame(g) {
+		return 0
+	}
+
+	var fraction float64
+	if shouldBet1(g) {
+		fraction = fractionToBet(g.OfferedOdds1, g.Prob1)
+	} else {
+		fraction = fractionToBet(g.OfferedOdds2, g.Prob2)
+	}
+
+	betSize := new(big.Float).Mul(big.NewFloat(fraction), big.NewFloat(bankroll()))
+	betSize = new(big.Float).Mul(betSize, big.NewFloat(kellyFraction))
+	betSizeAsFloat, _ := betSize.Float64()
+	return math.Min(betSizeAsFloat, maxBetFraction*bankroll())
+}
+
+func fractionToBet(offeredOdds float64, prob float64) float64 {
+	bp := new(big.Float).Mul(big.NewFloat(offeredOdds-1), big.NewFloat(prob))
+	bpp := new(big.Float).Sub(bp, big.NewFloat(1-prob))
+	f, _ := new(big.Float).Quo(bpp, big.NewFloat(offeredOdds-1)).Float64()
+	return f
+}
+
+func shouldBetOnGame(g Game) bool {
+	return shouldBet1(g) || shouldBet2(g)
+}
+
+func shouldBet1(g Game) bool {
+	return shouldBet(g.Odds1(), g.OfferedOdds1)
+}
+
+func shouldBet2(g Game) bool {
+	return shouldBet(g.Odds2(), g.OfferedOdds2)
+}
+
+func shouldBet(oddsPredicted float64, oddsOffered float64) bool {
+	if oddsPredicted == 0 || oddsOffered == 0 {
+		return false
+	}
+	return oddsOffered > oddsPredicted
 }
 
 func floatToString(f float64) string {
@@ -73,7 +123,18 @@ func AllGames() ([]Game, error) {
 	return gms, nil
 }
 
-func OneGame(id bson.ObjectId ) (Game, error) {
+func UpcomingGames() ([]Game, error) {
+
+	tomorrow := time.Now().Add(24 * time.Hour).UTC().Truncate(24*time.Hour)
+	var gms []Game
+	err := db.Games.Find(bson.M{"status": "pre", "dateTime": bson.M{"$lte": tomorrow}}).All(&gms)
+	if err != nil {
+		return nil, err
+	}
+	return gms, nil
+}
+
+func OneGame(id bson.ObjectId) (Game, error) {
 	var g Game
 	err := db.Games.Find(bson.M{"_id": id}).One(&g)
 	if err != nil {
@@ -82,7 +143,7 @@ func OneGame(id bson.ObjectId ) (Game, error) {
 	return g, nil
 }
 
-func UpdateGame(g Game) (error) {
+func UpdateGame(g Game) error {
 	return db.Games.Update(bson.M{"_id": g.ID}, &g)
 }
 
@@ -91,4 +152,8 @@ func floatOrZero(f float64) float64 {
 		return 0
 	}
 	return f
+}
+
+func bankroll() float64 {
+	return 97.26
 }
