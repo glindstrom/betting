@@ -53,6 +53,10 @@ func (g Game) Odds2String() string {
 	return floatToString(odds(g.Prob2))
 }
 
+func (g Game) BetPlaced() bool {
+	return g.PredictedWinner != ""
+}
+
 func odds(p float64) float64 {
 	x, y := big.NewFloat(1), big.NewFloat(p)
 	res, _ := new(big.Float).Quo(x, y).Float64()

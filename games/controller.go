@@ -27,6 +27,7 @@ type JsonGame struct {
 	BetSize         float64       `json:"betSize"`
 	PredictedWinner string        `json:"predictedWinner"`
 	BetAmount       float64       `json:"betAmount"`
+	BetPlaced       bool          `json:"betPlaced"`
 }
 
 func (gc GameController) GetUpcomingGames(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -156,6 +157,7 @@ func gamesAsJson(gms []Game) []JsonGame {
 			BetSize:         g.OptimalBetSize(),
 			PredictedWinner: g.PredictedWinner,
 			BetAmount:       g.BetAmount,
+			BetPlaced:       g.BetPlaced(),
 		}
 		rs = append(rs, r)
 	}
