@@ -122,7 +122,7 @@ func AllGames() ([]Game, error) {
 
 func UpcomingGames() ([]Game, error) {
 
-	tomorrow := time.Now().Add(24 * time.Hour).UTC().Truncate(24 * time.Hour)
+	tomorrow := time.Now().Add(48 * time.Hour).UTC().Truncate(24 * time.Hour)
 	var gms []Game
 	err := db.Games.Find(bson.M{"status": "pre", "dateTime": bson.M{"$lte": tomorrow}}).All(&gms)
 	if err != nil {
@@ -152,5 +152,5 @@ func floatOrZero(f float64) float64 {
 }
 
 func bankroll() float64 {
-	return 97.26
+	return 69.71
 }

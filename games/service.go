@@ -50,7 +50,6 @@ func truncateDate(d time.Time) time.Time {
 func fetchAllGames() []Game {
 	allGames := make([]GameDTO, 0)
 	allGames = append(allGames, importNBAGames()...)
-	allGames = append(allGames, importNFLGames()...)
 	allGames = append(allGames, importMLBGames()...)
 	v := make([]Game, 0, len(allGames))
 	for _, value := range allGames {
